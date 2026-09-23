@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """Download the three project datasets from Kaggle into data/raw/.
 
-Requires the Kaggle API to be set up: pip install kaggle, and a valid
-~/.kaggle/kaggle.json API token (see https://www.kaggle.com/docs/api).
+Requires the Kaggle API to be set up: pip install kaggle, plus credentials
+via ONE of:
+  - a .env file in the project root containing KAGGLE_API_TOKEN=... (this
+    script loads it automatically - see .env.example)
+  - the KAGGLE_API_TOKEN environment variable set directly in your shell
+  - the legacy ~/.kaggle/kaggle.json file
+See https://www.kaggle.com/docs/api for how to generate a token.
 
 Usage:
     python scripts/download_data.py                  # download all three
@@ -11,14 +16,22 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
 import zipfile
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
+
+# Load KAGGLE_API_TOKEN (or any other vars) from a .env file in the project
+# root, if one exists. Does nothing if there's no .env file - falls back to
+# whatever is already in the environment or in ~/.kaggle/kaggle.json.
+load_dotenv(PROJECT_ROOT / ".env")
 
 # (kaggle dataset slug, expected primary csv filename after unzip)
 DATASETS = {
@@ -31,8 +44,18 @@ DATASETS = {
 def _check_kaggle_cli() -> None:
     if shutil.which("kaggle") is None:
         sys.exit(
-            "The 'kaggle' CLI was not found. Install it with `pip install kaggle` "
-            "and place your API token at ~/.kaggle/kaggle.json, then re-run this script."
+            "The 'kaggle' CLI was not found. Install it with `pip install kaggle`, "
+            "then re-run this script."
+        )
+
+    has_token = bool(os.environ.get("KAGGLE_API_TOKEN"))
+    has_legacy_env = bool(os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"))
+    has_legacy_file = (Path.home() / ".kaggle" / "kaggle.json").exists()
+
+    if not (has_token or has_legacy_env or has_legacy_file):
+        sys.exit(
+            "No Kaggle credentials found. Set KAGGLE_API_TOKEN in a .env file in the "
+            "project root (see .env.example), or export it in your shell, then re-run."
         )
 
 
