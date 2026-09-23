@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+data/raw/*.csv
+data/processed/*
+results/*.csv
+results/*.json
+results/checkpoints/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!results/.gitkeep
