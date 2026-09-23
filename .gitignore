@@ -8,3 +8,4 @@ results/checkpoints/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !results/.gitkeep
+.env
