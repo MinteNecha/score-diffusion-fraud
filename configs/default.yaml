@@ -1,0 +1,56 @@
+# Default experiment configuration.
+# Override any of these from a script with load_config(path, overrides={...}).
+
+seed: 44
+
+# --- dataset ---
+dataset:
+  name: creditcard              # creditcard | bank_account_fraud | paysim
+  raw_dir: data/raw
+  processed_dir: data/processed
+  test_size: 0.3                # fraction of data held out for testing (contains all fraud + a normal sample)
+  val_size: 0.1                 # fraction of the training-normal data held out for validation during diffusion training
+
+# --- diffusion model ---
+diffusion:
+  hidden_dim: 128
+  n_hidden_layers: 3
+  time_embed_dim: 32
+  timesteps: 100                # number of diffusion steps T
+  beta_start: 0.0001
+  beta_end: 0.02
+  t_star: 94                    # noise level used at anomaly-scoring time (see scripts/sweep_tstar.py)
+  lr: 0.001
+  batch_size: 256
+  epochs: 50
+  weight_decay: 0.0
+
+# --- baselines ---
+baselines:
+  random_forest:
+    n_estimators: 200
+    max_depth: null
+  feedforward_nn:
+    hidden_dim: 64
+    n_hidden_layers: 2
+    lr: 0.001
+    batch_size: 256
+    epochs: 30
+  isolation_forest:
+    n_estimators: 200
+    contamination: auto
+  autoencoder:
+    hidden_dim: 32
+    latent_dim: 8
+    lr: 0.001
+    batch_size: 256
+    epochs: 30
+
+# --- evaluation ---
+evaluation:
+  target_fpr: 0.01              # for the "F1 at 1% FPR" metric
+
+# --- output ---
+output:
+  results_dir: results
+  model_dir: results/checkpoints

@@ -32,9 +32,13 @@ from src.utils.config import load_config  # noqa: E402
 from src.utils.seed import set_seed  # noqa: E402
 
 
-def run(dataset_name: str, config_path: str) -> pd.DataFrame:
-    cfg = load_config(config_path, overrides={"dataset": {"name": dataset_name}})
-    set_seed(cfg.seed)
+def run(dataset_name: str, config_path: str, seed: int | None = None, t_star: int | None = None) -> pd.DataFrame:
+    overrides = {"dataset": {"name": dataset_name}}
+    if seed is not None:
+        overrides["seed"] = seed
+    if t_star is not None:
+        overrides["diffusion"] = {"t_star": t_star}
+    cfg = load_config(config_path, overrides=overrides)
 
     print(f"\n=== Loading dataset: {dataset_name} ===")
     data = get_dataset(
@@ -75,7 +79,7 @@ def run(dataset_name: str, config_path: str) -> pd.DataFrame:
     import torch
 
     X_test_t = torch.tensor(data.X_test, dtype=torch.float32)
-    scores = diffusion.anomaly_score(X_test_t, t_star=cfg.diffusion.t_star).numpy()
+    scores = diffusion.anomaly_score(X_test_t, t_star=cfg.diffusion.t_star, n_repeats=5).numpy()
     metrics = evaluate_all(data.y_test, scores, target_fpr=cfg.evaluation.target_fpr)
     metrics.update({"model": "diffusion (ours)", "supervised": False, "train_time_s": train_time})
     results.append(metrics)
@@ -165,9 +169,11 @@ def main() -> None:
         choices=["creditcard", "bank_account_fraud", "paysim"],
     )
     parser.add_argument("--config", default=str(PROJECT_ROOT / "configs" / "default.yaml"))
+    parser.add_argument("--seed", type=int, default=None, help="Override configs/default.yaml's seed for a single run.")
+    parser.add_argument("--t-star", type=int, default=None, help="Override configs/default.yaml's diffusion.t_star.")
     args = parser.parse_args()
 
-    df = run(args.dataset, args.config)
+    df = run(args.dataset, args.config, seed=args.seed, t_star=args.t_star)
 
     print("\n=== Results ===")
     print(df.to_string(index=False))

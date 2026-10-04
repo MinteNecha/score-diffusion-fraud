@@ -1,0 +1,52 @@
+# Tiny-epoch config used only for scripts/make_synthetic_data.py smoke
+# testing - NOT for real experiments. Keeps everything fast so the whole
+# pipeline can be exercised end-to-end in seconds.
+
+seed: 42
+
+dataset:
+  name: creditcard
+  raw_dir: data/raw
+  processed_dir: data/processed
+  test_size: 0.3
+  val_size: 0.1
+
+diffusion:
+  hidden_dim: 16
+  n_hidden_layers: 2
+  time_embed_dim: 8
+  timesteps: 20
+  beta_start: 0.0001
+  beta_end: 0.02
+  t_star: 10
+  lr: 0.001
+  batch_size: 64
+  epochs: 3
+  weight_decay: 0.0
+
+baselines:
+  random_forest:
+    n_estimators: 20
+    max_depth: null
+  feedforward_nn:
+    hidden_dim: 16
+    n_hidden_layers: 1
+    lr: 0.001
+    batch_size: 64
+    epochs: 3
+  isolation_forest:
+    n_estimators: 20
+    contamination: auto
+  autoencoder:
+    hidden_dim: 16
+    latent_dim: 4
+    lr: 0.001
+    batch_size: 64
+    epochs: 3
+
+evaluation:
+  target_fpr: 0.01
+
+output:
+  results_dir: results
+  model_dir: results/checkpoints

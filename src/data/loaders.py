@@ -116,6 +116,11 @@ def load_creditcard(
     path = Path(raw_dir) / "creditcard.csv"
     df = pd.read_csv(path)
 
+    n_before = len(df)
+    df = df.drop_duplicates().reset_index(drop=True)
+    if len(df) != n_before:
+        print(f"[creditcard] dropped {n_before - len(df)} duplicate rows")
+
     y = df["Class"].to_numpy()
     df = df.drop(columns=["Class"])
 
@@ -129,6 +134,33 @@ def load_creditcard(
 
     return _make_splits(X, y, feature_names, "creditcard", test_size, val_size, seed)
 
+# Known sentinel columns from the NeurIPS 2022 BAF paper: -1 means
+# "not available" rather than a real measurement, so feeding it straight
+# into a scaler would treat a missing-code as a genuine, often extreme,
+# feature value and distort every model's view of the distribution.
+BAF_MISSING_SENTINEL_COLUMNS = [
+    "prev_address_months_count",
+    "current_address_months_count",
+    "bank_months_count",
+    "session_length_in_minutes",
+    "device_distinct_emails_8w",
+]
+
+
+def _handle_baf_missing_sentinels(df: pd.DataFrame) -> pd.DataFrame:
+    """Replace -1 'missing' sentinel codes with an explicit missing-indicator
+    column plus a median-imputed value, instead of letting the scaler treat
+    -1 as a real observation.
+    """
+    df = df.copy()
+    for col in BAF_MISSING_SENTINEL_COLUMNS:
+        if col not in df.columns:
+            continue
+        is_missing = df[col] == -1
+        df[f"{col}_missing"] = is_missing.astype(int)
+        median_value = df.loc[~is_missing, col].median()
+        df.loc[is_missing, col] = median_value
+    return df
 
 def load_bank_account_fraud(
     raw_dir: str | Path,
@@ -159,8 +191,8 @@ def load_bank_account_fraud(
         if col in df.columns:
             df = df.drop(columns=[col])
 
-    # Catch both classic numpy "object" string columns and pandas' newer
-    # dedicated string dtype (the default for text columns since pandas 3.0).
+    df = _handle_baf_missing_sentinels(df)
+
     categorical_cols = list(df.select_dtypes(include=["object", "string"]).columns)
     df = pd.get_dummies(df, columns=categorical_cols, dummy_na=False)
 

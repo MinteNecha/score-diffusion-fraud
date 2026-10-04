@@ -90,7 +90,7 @@ def main() -> None:
         if t_star >= cfg.diffusion.timesteps:
             print(f"  skipping t*={t_star} (>= timesteps={cfg.diffusion.timesteps})")
             continue
-        scores = diffusion.anomaly_score(X_test_t, t_star=t_star).numpy()
+        scores = diffusion.anomaly_score(X_test_t, t_star=t_star, n_repeats=5).numpy()
         metrics = evaluate_all(data.y_test, scores, target_fpr=cfg.evaluation.target_fpr)
         metrics["t_star"] = t_star
         rows.append(metrics)
