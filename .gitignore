@@ -9,6 +9,7 @@ results/checkpoints/
 !data/processed/.gitkeep
 !results/.gitkeep
 .env
-*png
-*txt
-*npz
+*.png
+*.txt
+*.npz
+*.jsonl
