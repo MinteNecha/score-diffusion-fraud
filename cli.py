@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Command line interface for the diffusion fraud detector.
 
     python cli.py train --dataset creditcard --t-star 94

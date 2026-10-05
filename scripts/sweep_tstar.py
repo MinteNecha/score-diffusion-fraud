@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Sweep the noise level t* and see how it affects the precision-recall
 trade-off of the diffusion anomaly detector.
 

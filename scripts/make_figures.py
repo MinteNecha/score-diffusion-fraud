@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Train diffusion, autoencoder and Random Forest once on one dataset, then
 save precision-recall curves, score histograms and a scoring-speed report.
 

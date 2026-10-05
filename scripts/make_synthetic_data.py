@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Generate small synthetic CSVs matching each dataset's real schema, for
 smoke-testing the pipeline without downloading the real (large) Kaggle
 data. NOT used for actual experiments/results - synthetic only.

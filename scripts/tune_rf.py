@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Tune the Random Forest baseline per dataset via cross-validated grid search.
 
 Why this exists: the diffusion model gets a real tuning pass (t* swept

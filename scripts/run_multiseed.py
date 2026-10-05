@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Run the full model comparison across multiple random seeds and report
 mean +/- std for every metric, instead of trusting a single noisy run.
 

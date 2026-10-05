@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Run the full comparison: diffusion anomaly detector vs all baselines,
 on one dataset, and save a results table.
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Download the three project datasets from Kaggle into data/raw/.
 
 Requires the Kaggle API to be set up: pip install kaggle, plus credentials

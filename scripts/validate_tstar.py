@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Check how much choosing t* on the test set inflates the diffusion results.
 
 The test split is cut into two stratified halves. t* is chosen on one half by
