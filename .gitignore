@@ -9,3 +9,6 @@ results/checkpoints/
 !data/processed/.gitkeep
 !results/.gitkeep
 .env
+*png
+*txt
+*npz

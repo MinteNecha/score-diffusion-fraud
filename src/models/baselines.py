@@ -23,13 +23,30 @@ import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 
-
 class RandomForestBaseline:
-    """Supervised classifier. anomaly_score = predicted probability of fraud."""
+    """Supervised classifier. anomaly_score = predicted probability of fraud.
 
-    def __init__(self, n_estimators: int = 200, max_depth: Optional[int] = None, seed: int = 42):
+    n_estimators/max_depth/min_samples_leaf/class_weight are tuned per
+    dataset by scripts/tune_rf.py (5-fold CV on average_precision, using
+    only X_train_full/y_train_full - the held-out test set is never touched
+    during tuning). See results/rf_best_params_<dataset>.json.
+    """
+
+    def __init__(
+        self,
+        n_estimators: int = 200,
+        max_depth: Optional[int] = None,
+        min_samples_leaf: int = 1,
+        class_weight: Optional[str] = None,
+        seed: int = 42,
+    ):
         self.model = RandomForestClassifier(
-            n_estimators=n_estimators, max_depth=max_depth, random_state=seed, n_jobs=-1
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            min_samples_leaf=min_samples_leaf,
+            class_weight=class_weight,
+            random_state=seed,
+            n_jobs=-1,
         )
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "RandomForestBaseline":
@@ -38,7 +55,6 @@ class RandomForestBaseline:
 
     def anomaly_score(self, X: np.ndarray) -> np.ndarray:
         return self.model.predict_proba(X)[:, 1]
-
 
 class _SimpleMLP(nn.Module):
     def __init__(self, in_dim: int, hidden_dim: int, n_hidden_layers: int, out_dim: int):

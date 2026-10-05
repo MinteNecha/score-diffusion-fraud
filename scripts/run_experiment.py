@@ -32,12 +32,25 @@ from src.utils.config import load_config  # noqa: E402
 from src.utils.seed import set_seed  # noqa: E402
 
 
+def _load_tuned_rf_params(dataset_name: str) -> dict:
+    """Pick up scripts/tune_rf.py's output for this dataset, if it exists."""
+    path = PROJECT_ROOT / "results" / f"rf_best_params_{dataset_name}.json"
+    if not path.exists():
+        return {}
+    with open(path) as f:
+        params = json.load(f)
+    print(f"[random_forest] using tuned params from {path}: {params}")
+    return params
+
 def run(dataset_name: str, config_path: str, seed: int | None = None, t_star: int | None = None) -> pd.DataFrame:
     overrides = {"dataset": {"name": dataset_name}}
     if seed is not None:
         overrides["seed"] = seed
     if t_star is not None:
         overrides["diffusion"] = {"t_star": t_star}
+    tuned_rf = _load_tuned_rf_params(dataset_name)
+    if tuned_rf:
+        overrides["baselines"] = {"random_forest": tuned_rf}
     cfg = load_config(config_path, overrides=overrides)
 
     print(f"\n=== Loading dataset: {dataset_name} ===")
@@ -91,6 +104,8 @@ def run(dataset_name: str, config_path: str, seed: int | None = None, t_star: in
     rf = RandomForestBaseline(
         n_estimators=cfg.baselines.random_forest.n_estimators,
         max_depth=cfg.baselines.random_forest.max_depth,
+        min_samples_leaf=cfg.baselines.random_forest.get("min_samples_leaf", 1),
+        class_weight=cfg.baselines.random_forest.get("class_weight", None),
         seed=cfg.seed,
     ).fit(data.X_train_full, data.y_train_full)
     train_time = time.time() - t0
